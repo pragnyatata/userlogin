@@ -1,15 +1,7 @@
-import {
-  Controller,
-  UseGuards,
-  HttpStatus,
-  Response,
-  Post,
-  Body,
-} from '@nestjs/common';
+import { Controller, HttpStatus, Response, Post, Body } from '@nestjs/common';
 import { CreateUserDto } from '../users/dto/createUser.dto';
 import { LoginUserDto } from '../users/dto/loginUser.dto';
 import { AuthService } from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../users/users.service';
 @Controller('auth')
 export class AuthController {
@@ -20,15 +12,23 @@ export class AuthController {
 
   @Post('register')
   public async register(@Response() res, @Body() createUserDto: CreateUserDto) {
-    const result = await this.authService.register(createUserDto);
-    if (!result.success) {
-      return res.status(HttpStatus.BAD_REQUEST).json(result);
+    const user = await this.usersService.findOne({
+      username: createUserDto.email,
+    });
+    if (user) {
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: 'User already registered' });
+    } else {
+      const result = await this.authService.register(createUserDto);
+      if (!result.success) {
+        return res.status(HttpStatus.BAD_REQUEST).json(result);
+      }
+      return res.status(HttpStatus.OK).json(result);
     }
-    return res.status(HttpStatus.OK).json(result);
   }
 
   @Post('login')
-  @UseGuards(AuthGuard('local'))
   public async login(@Response() res, @Body() login: LoginUserDto) {
     return await this.usersService
       .findOne({ username: login.email })

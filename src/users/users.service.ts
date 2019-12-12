@@ -31,7 +31,7 @@ export class UsersService implements IUsersService {
     const user = await this.userModel.findById(ID).exec();
 
     if (!user._id) {
-      debug('user not found');
+      console.log('user not found');
     }
 
     await this.userModel.findByIdAndUpdate(ID, newValue).exec();

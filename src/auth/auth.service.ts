@@ -30,7 +30,7 @@ export class AuthService {
       user.password,
       err => {
         if (err) {
-          debug(err);
+          console.log(err);
           status = { success: false, message: err };
         }
       },
